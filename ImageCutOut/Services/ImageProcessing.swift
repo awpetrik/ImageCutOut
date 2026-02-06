@@ -2,7 +2,11 @@ import Foundation
 import CoreImage
 
 struct ImageProcessing {
-    static let context = CIContext(options: [.useSoftwareRenderer: false])
+    private struct SendableContext: @unchecked Sendable {
+        let value: CIContext
+    }
+
+    private static let context = SendableContext(value: CIContext(options: [.useSoftwareRenderer: false]))
 
     static func loadCIImage(from url: URL) throws -> CIImage {
         guard let image = CIImage(contentsOf: url) else {
@@ -13,7 +17,7 @@ struct ImageProcessing {
 
     static func makeCGImage(from image: CIImage) -> CGImage? {
         let extent = image.extent
-        return context.createCGImage(image, from: extent)
+        return context.value.createCGImage(image, from: extent)
     }
 
     static func applyMask(image: CIImage, mask: CIImage) -> CIImage {

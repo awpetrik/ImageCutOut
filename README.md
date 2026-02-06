@@ -1,5 +1,11 @@
 # ImageCutOut
 
+![Swift](https://img.shields.io/badge/Swift-F05138?style=for-the-badge&logo=swift&logoColor=white)
+![SwiftUI](https://img.shields.io/badge/SwiftUI-18A2EB?style=for-the-badge&logo=swift&logoColor=white)
+![macOS](https://img.shields.io/badge/macOS-000000?style=for-the-badge&logo=apple&logoColor=white)
+![Core ML](https://img.shields.io/badge/Core_ML-3399CC?style=for-the-badge&logo=apple&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
+
 Production-grade macOS app for retail Category Managers to generate clean product cutouts in batch or per-image, with offline-first processing and optional AI metadata.
 
 ## Highlights

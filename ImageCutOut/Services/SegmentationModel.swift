@@ -1,6 +1,6 @@
 import Foundation
-import Vision
-import CoreML
+@preconcurrency import Vision
+@preconcurrency import CoreML
 import CoreImage
 
 protocol SegmentationModel {

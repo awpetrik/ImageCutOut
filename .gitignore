@@ -1,0 +1,28 @@
+# Xcode
+#
+# gitignore contributors: these configs are property of their respective owners.
+
+## Build results
+build/
+DerivedData/
+
+## Skeleton-generated results
+*.hmap
+*.ipa
+*.testrunconfig
+
+## User-specific stuff
+*.xcuserstate
+xcuserdata/
+
+## Others
+*.LSOverride
+.DS_Store
+*.swp
+*.lock
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+!default.mode1v3
+!default.mode2v3
+!default.perspectivev3
