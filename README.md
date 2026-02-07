@@ -1,7 +1,7 @@
 # ImageCutOut
 
 > **Status:** This macOS project is **discontinued**.
-> I’m migrating to a **web-based app** using **Next.js**, **Python**, and the **Gemini API** for segmentation.
+> I’m migrating to a **web-based app** using **Next.js**, **Python**, and the **Gemini API** for segmentation https://github.com/awpetrik/CuttingLabs
 
 ![Swift](https://img.shields.io/badge/Swift-F05138?style=for-the-badge&logo=swift&logoColor=white)
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-18A2EB?style=for-the-badge&logo=swift&logoColor=white)
