@@ -1,6 +1,6 @@
 import Foundation
 import AppKit
-import Combine
+@preconcurrency import Combine
 
 @MainActor
 final class BatchProcessor: ObservableObject {

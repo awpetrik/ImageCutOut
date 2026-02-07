@@ -34,17 +34,18 @@ enum AppSection: String, CaseIterable, Identifiable {
 struct ContentView: View {
     @EnvironmentObject private var appState: AppState
     @State private var isDropTargeted: Bool = false
+    @State private var selection: AppSection? = .home
 
     var body: some View {
         NavigationSplitView {
-            List(AppSection.allCases, selection: $appState.currentSection) { section in
+            List(AppSection.allCases, selection: $selection) { section in
                 Label(section.title, systemImage: section.systemImage)
                     .tag(section)
             }
             .frame(minWidth: 180)
         } detail: {
             Group {
-                switch appState.currentSection {
+                switch selection ?? .home {
                 case .home:
                     HomeView()
                 case .batchQueue:
@@ -58,6 +59,14 @@ struct ContentView: View {
                 }
             }
             .frame(minWidth: 900, minHeight: 600)
+        }
+        .onChange(of: selection) { _, newValue in
+            appState.currentSection = newValue ?? .home
+        }
+        .onReceive(appState.$currentSection) { newValue in
+            if selection != newValue {
+                selection = newValue
+            }
         }
         .overlay(alignment: .top) {
             if isDropTargeted {

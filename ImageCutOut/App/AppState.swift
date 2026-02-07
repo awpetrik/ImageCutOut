@@ -1,7 +1,7 @@
 import Foundation
 import AppKit
 import UniformTypeIdentifiers
-import Combine
+@preconcurrency import Combine
 
 @MainActor
 final class AppState: ObservableObject {

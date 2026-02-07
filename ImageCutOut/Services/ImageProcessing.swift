@@ -1,5 +1,5 @@
 import Foundation
-import CoreImage
+@preconcurrency import CoreImage
 
 struct ImageProcessing {
     private struct SendableContext: @unchecked Sendable {

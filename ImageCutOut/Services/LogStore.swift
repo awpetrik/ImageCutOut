@@ -1,7 +1,7 @@
 import Foundation
 import Combine
 
-final class LogStore: ObservableObject {
+final class LogStore: ObservableObject, @unchecked Sendable {
     @Published private(set) var entries: [LogEntry] = []
 
     private let queue = DispatchQueue(label: "ImageCutOut.LogStore", qos: .utility)

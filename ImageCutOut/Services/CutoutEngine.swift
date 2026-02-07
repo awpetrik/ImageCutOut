@@ -1,7 +1,7 @@
 import Foundation
-import CoreImage
+@preconcurrency import CoreImage
 
-struct CutoutResult {
+struct CutoutResult: @unchecked Sendable {
     var outputImage: CIImage
     var maskImage: CIImage
     var shadowLayer: CIImage?
