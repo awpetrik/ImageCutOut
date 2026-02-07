@@ -6,6 +6,10 @@
 ![Core ML](https://img.shields.io/badge/Core_ML-3399CC?style=for-the-badge&logo=apple&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
 
+
+<img width="2652" height="1632" alt="image" src="https://github.com/user-attachments/assets/d4508304-79ed-4893-9897-c8fb52e19bb6" />
+
+
 Production-grade macOS app for retail Category Managers to generate clean product cutouts in batch or per-image, with offline-first processing and optional AI metadata.
 
 ## Highlights
