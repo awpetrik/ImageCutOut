@@ -5,7 +5,6 @@ import UniformTypeIdentifiers
 
 @MainActor
 final class AppState: ObservableObject {
-    nonisolated let objectWillChange = ObservableObjectPublisher()
     var settings: SettingsStore
     var assetStore: AssetStore
     var logStore: LogStore

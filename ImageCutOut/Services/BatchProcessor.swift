@@ -4,7 +4,6 @@ import AppKit
 
 @MainActor
 final class BatchProcessor: ObservableObject {
-    nonisolated let objectWillChange = ObservableObjectPublisher()
     @Published private(set) var isRunning = false
     @Published private(set) var isPaused = false
     @Published private(set) var isCancelled = false

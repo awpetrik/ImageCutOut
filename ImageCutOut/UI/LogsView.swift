@@ -4,30 +4,43 @@ import AppKit
 struct LogsView: View {
     @EnvironmentObject private var appState: AppState
     @State private var selectedLevel: LogLevel? = nil
+    @State private var selection: LogEntry.ID?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
+        List(filteredEntries, selection: $selection) { entry in
+            VStack(alignment: .leading, spacing: 4) {
+                Text("[\(entry.level.rawValue.uppercased())] \(entry.message)")
+                Text(entry.timestamp.formatted(date: .numeric, time: .standard))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .contextMenu {
+                Button("Copy") { copy(entry) }
+            }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .principal) {
                 Picker("Level", selection: $selectedLevel) {
                     Text("All").tag(nil as LogLevel?)
                     ForEach(LogLevel.allCases) { level in
                         Text(level.rawValue.capitalized).tag(LogLevel?.some(level))
                     }
                 }
-                .pickerStyle(.segmented)
-                Spacer()
-                Button("Export Logs") { exportLogs() }
+                .pickerStyle(.menu)
             }
-            List(filteredEntries) { entry in
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("[\(entry.level.rawValue.uppercased())] \(entry.message)")
-                    Text(entry.timestamp.formatted(date: .numeric, time: .standard))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+            ToolbarItemGroup(placement: .primaryAction) {
+                Button {
+                    copySelected()
+                } label: {
+                    Label("Copy", systemImage: "doc.on.doc")
+                }
+                Button {
+                    exportLogs()
+                } label: {
+                    Label("Export Logs", systemImage: "square.and.arrow.up")
                 }
             }
         }
-        .padding(16)
     }
 
     private var filteredEntries: [LogEntry] {
@@ -35,6 +48,17 @@ struct LogsView: View {
             return appState.logStore.entries.filter { $0.level == level }
         }
         return appState.logStore.entries
+    }
+
+    private func copySelected() {
+        guard let selection, let entry = appState.logStore.entries.first(where: { $0.id == selection }) else { return }
+        copy(entry)
+    }
+
+    private func copy(_ entry: LogEntry) {
+        let text = "[\(entry.level.rawValue.uppercased())] \(entry.message)"
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
     }
 
     private func exportLogs() {

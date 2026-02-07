@@ -4,7 +4,6 @@ import AppKit
 
 @MainActor
 final class AssetStore: ObservableObject {
-    nonisolated let objectWillChange = ObservableObjectPublisher()
     @Published private(set) var assets: [AssetItem] = []
     @Published var selectedAssetIDs: Set<UUID> = []
 

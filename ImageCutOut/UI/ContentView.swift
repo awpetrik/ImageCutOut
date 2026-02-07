@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import AppKit
 
 enum AppSection: String, CaseIterable, Identifiable {
     case home
@@ -22,11 +23,11 @@ enum AppSection: String, CaseIterable, Identifiable {
 
     var systemImage: String {
         switch self {
-        case .home: return "square.grid.2x2"
+        case .home: return "house"
         case .batchQueue: return "tray.full"
         case .preview: return "photo.on.rectangle"
         case .settings: return "gearshape"
-        case .logs: return "text.book.closed"
+        case .logs: return "doc.text.magnifyingglass"
         }
     }
 }
@@ -35,32 +36,48 @@ struct ContentView: View {
     @EnvironmentObject private var appState: AppState
     @State private var isDropTargeted: Bool = false
     @State private var selection: AppSection? = .home
+    @State private var showInspector: Bool = true
 
     var body: some View {
         NavigationSplitView {
-            List(AppSection.allCases, selection: $selection) { section in
-                Label(section.title, systemImage: section.systemImage)
-                    .tag(section)
-            }
-            .frame(minWidth: 180)
-        } detail: {
-            Group {
-                switch selection ?? .home {
-                case .home:
-                    HomeView()
-                case .batchQueue:
-                    BatchQueueView()
-                case .preview:
-                    PreviewView()
-                case .settings:
-                    SettingsView()
-                case .logs:
-                    LogsView()
+            List(selection: $selection) {
+                ForEach(AppSection.allCases) { section in
+                    Label(section.title, systemImage: section.systemImage)
+                        .tag(section)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selection = section
+                        }
                 }
             }
-            .frame(minWidth: 900, minHeight: 600)
+            .listStyle(.sidebar)
+            .frame(minWidth: 200)
+        } detail: {
+            HStack(spacing: 0) {
+                Group {
+                    switch selection ?? .home {
+                    case .home:
+                        HomeView()
+                    case .batchQueue:
+                        BatchQueueView()
+                    case .preview:
+                        PreviewView()
+                    case .settings:
+                        SettingsView()
+                    case .logs:
+                        LogsView()
+                    }
+                }
+                .frame(minWidth: 700, minHeight: 600)
+
+                if showInspector {
+                    Divider()
+                    InspectorPanelView()
+                        .environmentObject(appState)
+                }
+            }
         }
-        .onChange(of: selection) { _, newValue in
+        .onChange(of: selection) { newValue in
             appState.currentSection = newValue ?? .home
         }
         .onReceive(appState.$currentSection) { newValue in
@@ -68,13 +85,28 @@ struct ContentView: View {
                 selection = newValue
             }
         }
-        .overlay(alignment: .top) {
+        .toolbar {
+            ToolbarItemGroup(placement: .navigation) {
+                Button {
+                    toggleSidebar()
+                } label: {
+                    Image(systemName: "sidebar.leading")
+                }
+                Button {
+                    showInspector.toggle()
+                } label: {
+                    Image(systemName: "sidebar.right")
+                }
+                .accessibilityLabel("Toggle Inspector")
+            }
+        }
+        .overlay(alignment: Alignment.top) {
             if isDropTargeted {
                 DropZoneBannerView()
                     .padding()
             }
         }
-        .onDrop(of: [.fileURL], isTargeted: $isDropTargeted) { providers in
+        .onDrop(of: [UTType.fileURL], isTargeted: $isDropTargeted) { providers -> Bool in
             providers.loadFileURLs { urls in
                 appState.handleDrop(urls: urls)
             }
@@ -83,6 +115,12 @@ struct ContentView: View {
         .sheet(isPresented: $appState.showResumePrompt) {
             ResumeBatchSheet()
         }
+    }
+
+    private func toggleSidebar() {
+        #if os(macOS)
+        NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)
+        #endif
     }
 }
 

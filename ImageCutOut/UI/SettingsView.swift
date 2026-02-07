@@ -8,18 +8,32 @@ struct SettingsView: View {
     @State private var testResult: String?
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+        HStack(spacing: 0) {
+            Form {
                 cutoutSection
                 batchSection
                 exportSection
-                aiSection
                 csvSection
                 uiSection
             }
-            .padding(24)
+            .formStyle(.grouped)
+            .frame(minWidth: 420, idealWidth: 460)
+
+            Divider()
+
+            providerPane
+                .frame(minWidth: 360, idealWidth: 420)
         }
-        .onChange(of: selectedProviderID) { _, newValue in
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    resetDefaults()
+                } label: {
+                    Label("Reset Defaults", systemImage: "arrow.counterclockwise")
+                }
+            }
+        }
+        .onChange(of: selectedProviderID) { newValue in
             guard let id = newValue else {
                 apiKeyInput = ""
                 return
@@ -29,99 +43,84 @@ struct SettingsView: View {
     }
 
     private var cutoutSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Cutout Engine").font(.headline)
-            VStack(alignment: .leading, spacing: 10) {
-                SliderSetting(title: "Edge Quality", value: $appState.settings.cutoutSettings.edgeQuality, range: 0...1)
-                SliderSetting(title: "Feather Radius", value: $appState.settings.cutoutSettings.featherRadius, range: 0...12)
-                SliderSetting(title: "Threshold", value: $appState.settings.cutoutSettings.threshold, range: 0...1)
-                SliderSetting(title: "Padding (%)", value: $appState.settings.cutoutSettings.paddingPercent, range: 0...30)
-                Toggle("Auto Crop", isOn: $appState.settings.cutoutSettings.autoCrop)
-                SliderSetting(title: "Min Object Size (%)", value: $appState.settings.cutoutSettings.minObjectSizePercent, range: 0...20)
-                SliderSetting(title: "Confidence Threshold", value: $appState.settings.cutoutSettings.confidenceThreshold, range: 0...1)
+        Section("Cutout Engine") {
+            LabeledContent("Edge Quality") {
+                Slider(value: $appState.settings.cutoutSettings.edgeQuality, in: 0...1)
             }
-            VStack(alignment: .leading, spacing: 10) {
-                Picker("Background", selection: $appState.settings.cutoutSettings.backgroundOption) {
-                    ForEach(BackgroundOption.allCases) { option in
-                        Text(option.rawValue.capitalized).tag(option)
-                    }
-                }
-                Picker("Shadow", selection: $appState.settings.cutoutSettings.shadowMode) {
-                    ForEach(ShadowMode.allCases) { mode in
-                        Text(mode.rawValue.capitalized).tag(mode)
-                    }
-                }
-                Toggle("Preserve Shadow Layer", isOn: $appState.settings.cutoutSettings.preserveShadowLayer)
-                Toggle("Hair/Fur Edge Mode", isOn: $appState.settings.cutoutSettings.hairEdgeMode)
-                Toggle("Glass Handling", isOn: $appState.settings.cutoutSettings.glassHandlingMode)
-                Toggle("Despeckle", isOn: $appState.settings.cutoutSettings.despeckle)
-                Toggle("Edge Smoothing", isOn: $appState.settings.cutoutSettings.edgeSmoothing)
-                Toggle("Auto White Balance", isOn: $appState.settings.cutoutSettings.autoWhiteBalance)
-                Toggle("Keep Largest Object Only", isOn: $appState.settings.cutoutSettings.keepLargestObjectOnly)
+            LabeledContent("Feather") {
+                Slider(value: $appState.settings.cutoutSettings.featherRadius, in: 0...12)
             }
+            LabeledContent("Threshold") {
+                Slider(value: $appState.settings.cutoutSettings.threshold, in: 0...1)
+            }
+            LabeledContent("Padding") {
+                Slider(value: $appState.settings.cutoutSettings.paddingPercent, in: 0...30)
+            }
+            Toggle("Auto Crop", isOn: $appState.settings.cutoutSettings.autoCrop)
+            Toggle("Hair/Fur Edge Mode", isOn: $appState.settings.cutoutSettings.hairEdgeMode)
+            Toggle("Glass Handling", isOn: $appState.settings.cutoutSettings.glassHandlingMode)
         }
-        .standardPanelStyle()
     }
 
     private var batchSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Batch Processing").font(.headline)
+        Section("Batch Processing") {
             Stepper("Concurrency: \(appState.settings.batchSettings.concurrencyLimit)", value: $appState.settings.batchSettings.concurrencyLimit, in: 1...6)
             Toggle("Recursive Folder Scan", isOn: $appState.settings.batchSettings.recursive)
             Toggle("Preserve EXIF", isOn: $appState.settings.batchSettings.preserveEXIF)
             Toggle("Retry on Failure", isOn: $appState.settings.batchSettings.retryOnFailure)
             Stepper("Max Retries: \(appState.settings.batchSettings.maxRetries)", value: $appState.settings.batchSettings.maxRetries, in: 0...5)
         }
-        .standardPanelStyle()
     }
 
     private var exportSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Export").font(.headline)
-            VStack(alignment: .leading, spacing: 10) {
-                TextField("Naming Rule", text: $appState.settings.exportSettings.namingRule)
-                    .textFieldStyle(.roundedBorder)
-                Toggle("Export JPG", isOn: $appState.settings.exportSettings.exportJPG)
-                SliderSetting(title: "JPG Quality", value: $appState.settings.exportSettings.jpgQuality, range: 0.5...1.0)
-                SliderSetting(title: "PNG Compression", value: $appState.settings.exportSettings.pngCompression, range: 0.0...1.0)
-                Toggle("Export ZIP Package", isOn: $appState.settings.exportSettings.exportZipPackage)
-                Toggle("Include Assets CSV", isOn: $appState.settings.exportSettings.includeAssetsCSV)
-                Toggle("Include PDF Report", isOn: $appState.settings.exportSettings.includePDFReport)
-                Toggle("Include Originals", isOn: $appState.settings.exportSettings.includeOriginals)
-            }
-            VStack(alignment: .leading, spacing: 10) {
-                Toggle("Watermark", isOn: $appState.settings.exportSettings.includeWatermark)
-                TextField("Watermark Text", text: $appState.settings.exportSettings.watermarkText)
-                    .textFieldStyle(.roundedBorder)
-            }
+        Section("Export Rules") {
+            TextField("Naming Rule", text: $appState.settings.exportSettings.namingRule)
+            Toggle("Export JPG", isOn: $appState.settings.exportSettings.exportJPG)
+            LabeledContent("JPG Quality") { Slider(value: $appState.settings.exportSettings.jpgQuality, in: 0.5...1.0) }
+            LabeledContent("PNG Compression") { Slider(value: $appState.settings.exportSettings.pngCompression, in: 0...1.0) }
+            Toggle("ZIP Package", isOn: $appState.settings.exportSettings.exportZipPackage)
+            Toggle("Include Assets CSV", isOn: $appState.settings.exportSettings.includeAssetsCSV)
         }
-        .standardPanelStyle()
     }
 
-    private var aiSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("AI Providers").font(.headline)
+    private var providerPane: some View {
+        VStack(spacing: 0) {
             HStack {
+                Text("AI Providers")
+                    .font(.headline)
+                Spacer()
+                Button {
+                    addProvider()
+                } label: {
+                    Image(systemName: "plus")
+                }
+                .accessibilityLabel("Add Provider")
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+
+            HStack(spacing: 0) {
                 providerList
+                Divider()
                 providerEditor
             }
+
             if let testResult {
                 Text(testResult)
-                    .font(.caption)
+                    .font(.footnote)
                     .foregroundStyle(.secondary)
+                    .padding(.top, 8)
             }
         }
-        .standardPanelStyle()
     }
 
     private var csvSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("SKU Mapping").font(.headline)
+        Section("CSV Mapping") {
             Button("Import CSV") { appState.importCSV() }
             Text("Entries: \(appState.settings.skuMapping.count)")
-                .font(.caption)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
         }
-        .standardPanelStyle()
         .onDrop(of: [.fileURL], isTargeted: .constant(false)) { providers in
             providers.loadFileURLs { urls in
                 guard let url = urls.first else { return }
@@ -142,8 +141,7 @@ struct SettingsView: View {
     }
 
     private var uiSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("UI").font(.headline)
+        Section("UI") {
             Picker("Theme", selection: $appState.settings.uiSettings.theme) {
                 ForEach(ThemeMode.allCases) { mode in
                     Text(mode.rawValue.capitalized).tag(mode)
@@ -152,69 +150,84 @@ struct SettingsView: View {
             .pickerStyle(.segmented)
             Button("Clear AI Cache") { AICache.shared.clear() }
         }
-        .standardPanelStyle()
     }
 
     private var providerList: some View {
-        VStack(alignment: .leading) {
-            List(selection: $selectedProviderID) {
-                ForEach(appState.settings.providerProfiles) { profile in
-                    Text(profile.name).tag(profile.id as UUID?)
-                }
-                .onDelete { indexSet in
-                    appState.settings.providerProfiles.remove(atOffsets: indexSet)
-                }
+        List(selection: $selectedProviderID) {
+            ForEach(appState.settings.providerProfiles) { profile in
+                Label(profile.name, systemImage: "key")
+                    .tag(profile.id as UUID?)
             }
-            HStack {
-                Button("Add Provider") { addProvider() }
-                Button("Remove") { removeProvider() }
+            .onDelete { indexSet in
+                appState.settings.providerProfiles.remove(atOffsets: indexSet)
             }
         }
-        .frame(width: 220)
+        .frame(minWidth: 220)
     }
 
     private var providerEditor: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             if let profileIndex = appState.settings.providerProfiles.firstIndex(where: { $0.id == selectedProviderID }) {
                 let binding = $appState.settings.providerProfiles[profileIndex]
-                VStack(alignment: .leading, spacing: 8) {
-                    TextField("Name", text: binding.name)
-                        .textFieldStyle(.roundedBorder)
-                    Picker("Type", selection: binding.type) {
-                        ForEach(AIProviderType.allCases) { type in
-                            Text(type.rawValue).tag(type)
+                Form {
+                    Section("Profile") {
+                        TextField("Name", text: binding.name)
+                        Picker("Type", selection: binding.type) {
+                            ForEach(AIProviderType.allCases) { type in
+                                Text(type.rawValue).tag(type)
+                            }
+                        }
+                        TextField("Base URL", text: binding.baseURLString)
+                        TextField("Model", text: binding.modelName)
+                        Stepper("Timeout: \(Int(binding.timeoutSeconds.wrappedValue))s", value: binding.timeoutSeconds, in: 5...120)
+                        Stepper("Rate Limit: \(binding.rateLimitPerMinute.wrappedValue)/min", value: binding.rateLimitPerMinute, in: 1...300)
+                        Toggle("Enabled", isOn: binding.isEnabled)
+                    }
+                    Section("Authentication") {
+                        SecureField("API Key", text: $apiKeyInput)
+                        HStack {
+                            Button("Save") { saveAPIKey(profile: binding.wrappedValue) }
+                            Button("Test") { testConnection(profile: binding.wrappedValue) }
+                            Spacer()
+                            Button("Remove") { removeProvider() }
                         }
                     }
-                    TextField("Base URL", text: binding.baseURLString)
-                        .textFieldStyle(.roundedBorder)
-                    TextField("Model", text: binding.modelName)
-                        .textFieldStyle(.roundedBorder)
-                    Stepper("Timeout: \(Int(binding.timeoutSeconds.wrappedValue))s", value: binding.timeoutSeconds, in: 5...120)
-                    Stepper("Rate Limit: \(binding.rateLimitPerMinute.wrappedValue)/min", value: binding.rateLimitPerMinute, in: 1...300)
-                    Toggle("Enabled", isOn: binding.isEnabled)
                 }
-                VStack(alignment: .leading, spacing: 8) {
-                    SecureField("API Key", text: $apiKeyInput)
-                    HStack {
-                        Button("Save API Key") { saveAPIKey(profile: binding.wrappedValue) }
-                        Button("Test Connection") { testConnection(profile: binding.wrappedValue) }
-                    }
-                    let provider = AIProviderRegistry.shared.provider(for: binding.wrappedValue)
-                    let caps = provider.capabilities
-                    Text("Capabilities: Vision \(caps.supportsVision ? "yes" : "no"), OCR \(caps.supportsOCR ? "yes" : "no"), LLM \(caps.supportsLLM ? "yes" : "no"), Multimodal \(caps.supportsMultimodal ? "yes" : "no")")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    let estimate = provider.estimateUsage(for: appState.assetStore.allAssets().count)
-                    Text(String(format: "Estimated cost: $%.2f for %d items", estimate.estimatedCostUSD, appState.assetStore.allAssets().count))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+                .formStyle(.grouped)
             } else {
-                Text("Select a provider to edit")
-                    .foregroundStyle(.secondary)
+                UnavailableView(title: "Select Provider", systemImage: "key", message: "Choose a provider from the list.")
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private struct UnavailableView: View {
+        let title: String
+        let systemImage: String
+        let message: String
+
+        var body: some View {
+            VStack(spacing: 8) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 28, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                Text(title)
+                    .font(.headline)
+                Text(message)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding()
+        }
+    }
+
+    private func resetDefaults() {
+        appState.settings.cutoutSettings = .default
+        appState.settings.batchSettings = .default
+        appState.settings.exportSettings = .default
+        appState.settings.qualitySettings = .default
+        appState.settings.uiSettings = .default
     }
 
     private func addProvider() {
